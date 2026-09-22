@@ -1,0 +1,462 @@
+﻿@model IEnumerable<BLEForensics.Models.AttackEvent>
+
+@{
+    ViewData["Title"] = "Detected Threats";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div>
+        <h2>Detected Threats</h2>
+
+        <p class="text-muted mb-0">
+            Review and investigate suspicious Bluetooth activity.
+        </p>
+    </div>
+
+    <a asp-controller="Dashboard"
+       asp-action="Index"
+       class="btn btn-outline-secondary">
+
+        ← Dashboard
+
+    </a>
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- Threat Filters -->
+<!-- ========================================================= -->
+
+<div class="card shadow-sm mb-4">
+
+    <div class="card-body">
+
+        <h5 class="mb-3">
+            Filter Threats
+        </h5>
+
+        <form asp-controller="Threats"
+              asp-action="Index"
+              method="get">
+
+            <div class="row">
+
+                <!-- Severity -->
+
+                <div class="col-md-4 mb-3">
+
+                    <label class="form-label">
+                        Severity
+                    </label>
+
+                    <select name="severity"
+                            class="form-select">
+
+                        <option value="">
+                            All Severities
+                        </option>
+
+                        @foreach (var item
+                            in ViewBag.Severities)
+                        {
+                            <option value="@item"
+                                    selected="@(ViewBag.SelectedSeverity == item)">
+
+                                @item
+
+                            </option>
+                        }
+
+                    </select>
+
+                </div>
+
+
+                <!-- Attack Type -->
+
+                <div class="col-md-4 mb-3">
+
+                    <label class="form-label">
+                        Attack Type
+                    </label>
+
+                    <select name="attackType"
+                            class="form-select">
+
+                        <option value="">
+                            All Attack Types
+                        </option>
+
+                        @foreach (var item
+                            in ViewBag.AttackTypes)
+                        {
+                            <option value="@item"
+                                    selected="@(ViewBag.SelectedAttackType == item)">
+
+                                @item
+
+                            </option>
+                        }
+
+                    </select>
+
+                </div>
+
+
+                <!-- Buttons -->
+
+                <div class="col-md-4 mb-3 d-flex align-items-end">
+
+                    <button type="submit"
+                            class="btn btn-primary me-2">
+
+                        Apply Filter
+
+                    </button>
+
+                    <a asp-controller="Threats"
+                       asp-action="Index"
+                       class="btn btn-outline-secondary">
+
+                        Reset
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- Threat Summary -->
+<!-- ========================================================= -->
+
+<div class="row mb-4">
+
+    <div class="col-md-3 mb-3">
+
+        <div class="card shadow-sm">
+
+            <div class="card-body">
+
+                <h6 class="text-muted">
+                    Total Threats
+                </h6>
+
+                <h2>
+                    @Model.Count()
+                </h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-3 mb-3">
+
+        <div class="card shadow-sm">
+
+            <div class="card-body">
+
+                <h6 class="text-muted">
+                    High Severity
+                </h6>
+
+                <h2 class="text-danger">
+
+                    @Model.Count(
+                        x => x.Severity == "High")
+
+                </h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-3 mb-3">
+
+        <div class="card shadow-sm">
+
+            <div class="card-body">
+
+                <h6 class="text-muted">
+                    Medium Severity
+                </h6>
+
+                <h2 class="text-warning">
+
+                    @Model.Count(
+                        x => x.Severity == "Medium")
+
+                </h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-3 mb-3">
+
+        <div class="card shadow-sm">
+
+            <div class="card-body">
+
+                <h6 class="text-muted">
+                    Low Severity
+                </h6>
+
+                <h2 class="text-info">
+
+                    @Model.Count(
+                        x => x.Severity == "Low")
+
+                </h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- Threat Table -->
+<!-- ========================================================= -->
+
+<div class="card shadow-sm">
+
+    <div class="card-body">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+
+            <h4 class="mb-0">
+                Threat Events
+            </h4>
+
+            <span class="text-muted">
+                @Model.Count() event(s)
+            </span>
+
+        </div>
+
+
+        @if (Model.Any())
+        {
+            <div class="table-responsive">
+
+                <table class="table table-bordered table-hover align-middle">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                #
+                            </th>
+
+                            <th>
+                                Attack Type
+                            </th>
+
+                            <th>
+                                Severity
+                            </th>
+
+                            <th>
+                                Source
+                            </th>
+
+                            <th>
+                                Destination
+                            </th>
+
+                            <th>
+                                Description
+                            </th>
+
+                            <th>
+                                Timestamp
+                            </th>
+
+                            <th>
+                                Action
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        @{
+                            var number = 1;
+                        }
+
+                        @foreach (var threat in Model)
+                        {
+                            <tr>
+
+                                <td>
+                                    @number
+                                </td>
+
+
+                                <td>
+
+                                    <strong>
+                                        @threat.AttackType
+                                    </strong>
+
+                                </td>
+
+
+                                <td>
+
+                                    @if (threat.Severity == "High")
+                                    {
+                                        <span class="badge bg-danger">
+                                            High
+                                        </span>
+                                    }
+                                    else if (threat.Severity == "Medium")
+                                    {
+                                        <span class="badge bg-warning text-dark">
+                                            Medium
+                                        </span>
+                                    }
+                                    else if (threat.Severity == "Low")
+                                    {
+                                        <span class="badge bg-info text-dark">
+                                            Low
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">
+                                            @threat.Severity
+                                        </span>
+                                    }
+
+                                </td>
+
+
+                                <td>
+
+                                    @if (!string.IsNullOrWhiteSpace(
+                                        threat.Source))
+                                    {
+                                        <code>
+                                            @threat.Source
+                                        </code>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">
+                                            Unknown
+                                        </span>
+                                    }
+
+                                </td>
+
+
+                                <td>
+
+                                    @if (!string.IsNullOrWhiteSpace(
+                                        threat.Destination))
+                                    {
+                                        <code>
+                                            @threat.Destination
+                                        </code>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">
+                                            Unknown
+                                        </span>
+                                    }
+
+                                </td>
+
+
+                                <td>
+
+                                    @threat.Description
+
+                                </td>
+
+
+                                <td>
+
+                                    @threat.Timestamp
+
+                                </td>
+
+
+                                <td>
+
+                                    <a asp-controller="Evidence"
+                                       asp-action="Details"
+                                       asp-route-id="@threat.EvidenceFileId"
+                                       class="btn btn-sm btn-primary">
+
+                                        View Evidence
+
+                                    </a>
+
+                                </td>
+
+                            </tr>
+
+                            number++;
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+
+                <h5 class="text-muted">
+                    No threats found.
+                </h5>
+
+                <p class="text-muted">
+                    No suspicious events match the selected filters.
+                </p>
+
+                <a asp-controller="Threats"
+                   asp-action="Index"
+                   class="btn btn-outline-primary">
+
+                    Clear Filters
+
+                </a>
+
+            </div>
+        }
+
+    </div>
+
+</div>

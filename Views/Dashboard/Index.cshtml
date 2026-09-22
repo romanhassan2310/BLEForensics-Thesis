@@ -1,0 +1,708 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-1">BLE Forensic Dashboard</h2>
+        <p class="text-muted mb-0">
+            Bluetooth traffic forensic analysis overview
+        </p>
+    </div>
+</div>
+
+
+<!-- ========================================================= -->
+<!-- Summary Statistics -->
+<!-- ========================================================= -->
+
+<div class="row">
+
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="text-muted">Evidence Files</h6>
+                <h2 class="mb-0">
+                    @ViewBag.TotalEvidence
+                </h2>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="text-muted">Analysis Sessions</h6>
+                <h2 class="mb-0">
+                    @ViewBag.TotalSessions
+                </h2>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="text-muted">Packets Analyzed</h6>
+                <h2 class="mb-0">
+                    @ViewBag.TotalPackets
+                </h2>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="text-muted">Bluetooth Devices</h6>
+                <h2 class="mb-0">
+                    @ViewBag.TotalBluetoothDevices
+                </h2>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- Threat Statistics -->
+<!-- ========================================================= -->
+
+<div class="row">
+
+    <div class="col-md-3 mb-3">
+       <div class="card shadow-sm h-100">
+    <div class="card-body">
+
+        <h6 class="text-muted">
+            Total Threats
+        </h6>
+
+        <h2 class="mb-0">
+            @ViewBag.TotalThreats
+        </h2>
+
+        <small class="text-muted">
+            Detected suspicious events
+        </small>
+
+    </div>
+</div>
+    </div>
+
+
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="text-muted">High Severity</h6>
+                <h2 class="mb-0">
+                    @ViewBag.HighSeverity
+                </h2>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="text-muted">Medium Severity</h6>
+                <h2 class="mb-0">
+                    @ViewBag.MediumSeverity
+                </h2>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="text-muted">Low Severity</h6>
+                <h2 class="mb-0">
+                    @ViewBag.LowSeverity
+                </h2>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- Threat Charts -->
+<!-- ========================================================= -->
+
+<div class="row mt-3">
+
+    <!-- Threat Severity -->
+
+    <div class="col-md-6 mb-4">
+
+        <div class="card shadow-sm h-100">
+
+            <div class="card-body">
+
+                <h4 class="mb-3">
+                    Threat Severity Distribution
+                </h4>
+
+                <div style="position: relative; height: 350px;">
+
+                    <canvas id="severityChart"></canvas>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Threat Type -->
+
+    <div class="col-md-6 mb-4">
+
+        <div class="card shadow-sm h-100">
+
+            <div class="card-body">
+
+                <h4 class="mb-3">
+                    Threat Type Distribution
+                </h4>
+
+                <div style="position: relative; height: 350px;">
+
+                    <canvas id="typeChart"></canvas>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- Bluetooth Protocol Distribution -->
+<!-- ========================================================= -->
+
+<div class="row">
+
+    <div class="col-md-12 mb-4">
+
+        <div class="card shadow-sm">
+
+            <div class="card-body">
+
+                <h4 class="mb-3">
+                    Bluetooth Protocol Distribution
+                </h4>
+
+                <div style="position: relative; height: 400px;">
+
+                    <canvas id="protocolChart"></canvas>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- Recent Threats -->
+<!-- ========================================================= -->
+
+<div class="row">
+
+    <div class="col-md-6 mb-4">
+
+        <div class="card shadow-sm">
+
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="mb-0">
+                        Recent Threats
+                    </h4>
+                    <a asp-controller="Threats"
+                       asp-action="Index"
+                       class="btn btn-sm btn-outline-primary">
+                        View All Threats
+                    </a>
+                </div>
+
+                @if (ViewBag.RecentThreats != null &&
+                     ViewBag.RecentThreats.Count > 0)
+                {
+                    <div class="table-responsive">
+                        <table class="table table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Attack Type</th>
+                                    <th>Severity</th>
+                                    <th>Timestamp</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                @foreach (var threat in ViewBag.RecentThreats)
+                                {
+                                    <tr>
+
+                                        <td>
+                                            <strong>
+                                                @threat.AttackType
+                                            </strong>
+                                        </td>
+
+                                        <td>
+                                            @if (threat.Severity == "High")
+                                            {
+                                                <span class="badge bg-danger">
+                                                    High
+                                                </span>
+                                            }
+                                            else if (threat.Severity == "Medium")
+                                            {
+                                                <span class="badge bg-warning text-dark">
+                                                    Medium
+                                                </span>
+                                            }
+                                            else if (threat.Severity == "Low")
+                                            {
+                                                <span class="badge bg-info text-dark">
+                                                    Low
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">
+                                                    @threat.Severity
+                                                </span>
+                                            }
+                                        </td>
+
+                                        <td>
+                                            @threat.Timestamp
+                                        </td>
+
+                                        <td>
+
+                                            <a asp-controller="Evidence"
+                                               asp-action="Details"
+                                               asp-route-id="@threat.EvidenceFileId"
+                                               class="btn btn-sm btn-outline-primary">
+
+                                                View Evidence
+
+                                            </a>
+
+                                        </td>
+
+                                    </tr>
+                                }
+                            </tbody>
+
+                        </table>
+
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">
+                        No threats have been detected.
+                    </p>
+                }
+
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- Recent Evidence -->
+    <!-- ===================================================== -->
+
+    <div class="col-md-6 mb-4">
+
+        <div class="card shadow-sm">
+
+            <div class="card-body">
+
+                <h4 class="mb-3">
+                    Recent Evidence Files
+                </h4>
+
+                @if (ViewBag.RecentEvidence != null &&
+                     ViewBag.RecentEvidence.Count > 0)
+                {
+                    <div class="table-responsive">
+
+                        <table class="table table-striped table-bordered">
+
+                            <thead>
+                                <tr>
+                                    <th>File Name</th>
+                                    <th>Upload Date</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                @foreach (var evidence in ViewBag.RecentEvidence)
+                                {
+                                    <tr>
+                                        <td>
+                                            <a asp-controller="Evidence"
+                                               asp-action="Details"
+                                               asp-route-id="@evidence.Id"
+                                               class="text-decoration-none">
+                                                <strong>@evidence.FileName</strong>
+                                            </a>
+                                        </td>
+
+<td>
+    @{
+        var bangladeshTime =
+            TimeZoneInfo.ConvertTimeBySystemTimeZoneId(
+                DateTime.SpecifyKind(
+                    evidence.UploadDate,
+                    DateTimeKind.Utc
+                ),
+                "Bangladesh Standard Time"
+            );
+    }
+
+    @bangladeshTime.ToString("yyyy-MM-dd HH:mm:ss")
+</td>
+
+                                        <td>
+                                            <a asp-controller="Evidence"
+                                               asp-action="Details"
+                                               asp-route-id="@evidence.Id"
+                                               class="btn btn-sm btn-primary">
+                                                View
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+
+                        </table>
+
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">
+                        No evidence files have been uploaded.
+                    </p>
+                }
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- Chart.js -->
+<!-- ========================================================= -->
+@section Scripts
+{
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+    <!-- ===================================================== -->
+    <!-- Threat Severity Chart -->
+    <!-- ===================================================== -->
+
+<script>
+
+    const severityChart =
+        document.getElementById('severityChart');
+
+
+    const highSeverity =
+        @ViewBag.HighSeverity;
+
+    const mediumSeverity =
+        @ViewBag.MediumSeverity;
+
+    const lowSeverity =
+        @ViewBag.LowSeverity;
+
+
+    new Chart(severityChart, {
+
+        type: 'pie',
+
+        data:
+        {
+            labels:
+            [
+                'High',
+                'Medium',
+                'Low'
+            ],
+
+            datasets:
+            [
+                {
+                    data:
+                    [
+                        highSeverity,
+                        mediumSeverity,
+                        lowSeverity
+                    ]
+                }
+            ]
+        },
+
+        options:
+        {
+            responsive:
+                true,
+
+            plugins:
+            {
+                legend:
+                {
+                    position:
+                        'bottom'
+                }
+            }
+        }
+
+    });
+
+</script>
+
+
+    <!-- ===================================================== -->
+    <!-- Threat Type Chart -->
+    <!-- ===================================================== -->
+<script>
+
+    const typeChart =
+        document.getElementById('typeChart');
+
+    const threatTypeLabels =
+        @Html.Raw(
+            System.Text.Json.JsonSerializer.Serialize<object>(
+                ViewBag.ThreatTypeLabels
+            )
+        );
+
+    const threatTypeCounts =
+        @Html.Raw(
+            System.Text.Json.JsonSerializer.Serialize<object>(
+                ViewBag.ThreatTypeCounts
+            )
+        );
+
+    new Chart(typeChart, {
+
+        type: 'bar',
+
+        data: {
+
+            labels: threatTypeLabels,
+
+            datasets: [{
+
+                label: 'Threat Count',
+
+                data: threatTypeCounts
+
+            }]
+        },
+
+        options: {
+
+            responsive: true,
+
+            maintainAspectRatio: false,
+
+            plugins: {
+
+                legend: {
+                    display: true
+                },
+
+                tooltip: {
+                    enabled: true
+                }
+
+            },
+
+            scales: {
+
+                y: {
+
+                    beginAtZero: true,
+
+                    ticks: {
+                        precision: 0
+                    },
+
+                    title: {
+
+                        display: true,
+
+                        text: 'Number of Threats'
+
+                    }
+
+                },
+
+                x: {
+
+                    title: {
+
+                        display: true,
+
+                        text: 'Attack Type'
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    });
+
+</script>
+
+    <!-- ===================================================== -->
+    <!-- Bluetooth Protocol Chart -->
+    <!-- ===================================================== -->
+
+    <script>
+
+        const protocolCanvas =
+            document.getElementById("protocolChart");
+
+        if (
+            protocolCanvas &&
+            typeof Chart !== "undefined"
+        ) {
+            new Chart(
+                protocolCanvas,
+                {
+                    type: "bar",
+
+                    data:
+                    {
+                        labels:
+                            [
+                                "HCI Commands",
+                                "HCI Events",
+                                "HCI ACL",
+                                "L2CAP",
+                                "RFCOMM",
+                                "OBEX",
+                                "SDP"
+                            ],
+
+                        datasets:
+                            [
+                                {
+                                    label:
+                                        "Packet Count",
+
+                                    data:
+                                        [
+                                            @ViewBag.HCICommands,
+                                            @ViewBag.HCIEvents,
+                                            @ViewBag.HCIACL,
+                                            @ViewBag.L2CAP,
+                                            @ViewBag.RFCOMM,
+                                            @ViewBag.OBEX,
+                                            @ViewBag.SDP
+                                        ]
+                                }
+                            ]
+                    },
+
+                    options:
+                    {
+                        responsive: true,
+
+                        maintainAspectRatio: false,
+
+                        plugins:
+                        {
+                            legend:
+                            {
+                                display: true
+                            },
+
+                            tooltip:
+                            {
+                                enabled: true
+                            }
+                        },
+
+                        scales:
+                        {
+                            y:
+                            {
+                                beginAtZero: true,
+
+                                ticks:
+                                {
+                                    precision: 0
+                                },
+
+                                title:
+                                {
+                                    display: true,
+
+                                    text:
+                                        "Packet Count"
+                                }
+                            },
+
+                            x:
+                            {
+                                title:
+                                {
+                                    display: true,
+
+                                    text:
+                                        "Bluetooth Protocol"
+                                }
+                            }
+                        }
+                    }
+                }
+            );
+        }
+
+    </script>
+}

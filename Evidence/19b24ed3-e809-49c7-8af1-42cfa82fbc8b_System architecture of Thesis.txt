@@ -1,0 +1,146 @@
+Thesis Stack
+----------------
+
+| Layer           | Technology             |
+| --------------- | ---------------------- |
+| Packet Analysis | Python + Scapy/PyShark |
+| Web Application | ASP.NET Core MVC/Razor |
+| Database        | SQL Server             |
+| ORM             | Entity Framework Core  |
+| Visualization   | Razor + Chart.js       |
+| Validation      | Wireshark              |
+
+
+WorkFlow
+-------------
+User Uploads PCAP File
+          ↓
+ASP.NET Core (Razor)
+          ↓
+Python BLE Analysis Engine
+          ↓
+Attack Detection Rules
+          ↓
+SQL Server (Evidence Storage)
+          ↓
+Dashboard & Reports
+
+
+Phase 1: System Design
+--------------------------------------
+User Workflow
+Step 1
+-------
+User uploads a .pcap file.
+
+Step 2
+-------
+ASP.NET Core saves the file.
+
+Step 3
+--------
+ASP.NET Core calls the Python analyzer.
+
+Example:
+python analyzer.py uploaded_file.pcap
+
+Step 4
+----------
+Python extracts:
+
+1. Timestamp
+2. Source MAC
+3. Destination MAC
+4. Packet Type
+5. Payload Length
+
+Step 5
+--------
+Python detects:
+1. Replay attack
+2. Flooding behavior
+3. Excessive pairing requests
+
+Step 6
+---------
+Python returns JSON.
+{
+  "totalPackets": 245,
+  "devices": 8,
+  "attacks": [
+    {
+      "type": "Replay Attack",
+      "severity": "High"
+    }
+  ]
+}
+
+Step 7
+----------
+ASP.NET Core stores results in SQL Server.
+
+Step 8
+--------
+Dashboard displays:
+1. Total Packets
+2. Devices
+3. Attack Count
+4. Evidence Files
+
+
+Phase 2: Database Design
+---------------------------
+We will start with only 4 tables.
+
+1. EvidenceFiles
+
+| Field      | Type     |
+| ---------- | -------- |
+| Id         | int      |
+| FileName   | nvarchar |
+| FilePath   | nvarchar |
+| UploadDate | datetime |
+| SHA256Hash | nvarchar |
+
+
+2. Devices
+| Field      | Type     |
+| ---------- | -------- |
+| Id         | int      |
+| MacAddress | nvarchar |
+| DeviceName | nvarchar |
+
+
+3. PacketLogs
+| Field         | Type     |
+| ------------- | -------- |
+| Id            | int      |
+| Timestamp     | datetime |
+| PacketType    | nvarchar |
+| PayloadLength | int      |
+| DeviceId      | FK       |
+
+
+4. AttackEvents
+| Field       | Type     |
+| ----------- | -------- |
+| Id          | int      |
+| AttackType  | nvarchar |
+| Severity    | nvarchar |
+| Description | nvarchar |
+| Timestamp   | datetime |
+
+
+Phase 3: Project Structure
+---------------------------
+BLEForensics/
+│
+├── Controllers/
+├── Models/
+├── Services/
+├── Views/
+├── Evidence/
+├── Python/
+│   └── analyzer.py
+│
+└── Data/

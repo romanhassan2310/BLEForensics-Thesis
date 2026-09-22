@@ -1,0 +1,63 @@
+﻿@model List<BLEForensics.ViewModels.EvidenceListViewModel>
+
+@{
+    ViewData["Title"] = "Evidence Repository";
+}
+
+<h2>Evidence Repository</h2>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>File Name</th>
+            <th>Upload Date</th>
+            <th>SHA256 Hash</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Id</td>
+
+                <td>@item.FileName</td>
+
+                <td>
+                    @{
+                        var bangladeshTime =
+                            TimeZoneInfo.ConvertTimeBySystemTimeZoneId(
+                                DateTime.SpecifyKind(
+                                    item.UploadDate,   // <- use item instead of Model.Evidence
+                                    DateTimeKind.Utc
+                                ),
+                                "Bangladesh Standard Time"
+                            );
+                    }
+
+                    @bangladeshTime.ToString("yyyy-MM-dd HH:mm:ss")
+                </td>
+
+                <td>
+                    @(item.SHA256Hash.Length > 25
+                        ? item.SHA256Hash.Substring(0, 25) + "..."
+                        : item.SHA256Hash)
+                </td>
+
+                <td>
+                    <a asp-action="Details"
+                       asp-route-id="@item.Id"
+                       class="btn btn-primary btn-sm">
+                        View
+                    </a>
+                </td>
+
+            </tr>
+        }
+
+    </tbody>
+
+</table>

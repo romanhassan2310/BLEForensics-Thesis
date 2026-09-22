@@ -1,0 +1,31 @@
+﻿@model BLEForensics.ViewModels.EvidenceUploadViewModel
+
+<h2>Upload Evidence File</h2>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Success"]
+    </div>
+}
+
+<form asp-action="Upload"
+      method="post"
+      enctype="multipart/form-data">
+
+    <div class="mb-3">
+        <label>Select PCAP File</label>
+
+        <input asp-for="EvidenceFile"
+               class="form-control" />
+
+        <span asp-validation-for="EvidenceFile"
+              class="text-danger"></span>
+    </div>
+
+    <button type="submit"
+            class="btn btn-primary">
+        Upload
+    </button>
+
+</form>

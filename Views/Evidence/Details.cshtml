@@ -1,0 +1,2534 @@
+﻿@model BLEForensics.ViewModels.EvidenceDetailsViewModel
+
+@{
+    ViewData["Title"] = "Evidence Details";
+}
+
+<h2 class="mb-4">Evidence Details</h2>
+
+
+<!-- ========================================================= -->
+<!-- Evidence Information -->
+<!-- ========================================================= -->
+
+<div class="card mb-4">
+    <div class="card-body">
+
+        <h4 class="mb-3">Evidence Information</h4>
+
+        <p>
+            <strong>File Name:</strong>
+            @Model.Evidence.FileName
+        </p>
+
+        <p>
+            <strong>Upload Date (UTC):</strong>
+            <code>
+                @Model.Evidence.UploadDate.ToString("yyyy-MM-dd HH:mm:ss")
+            </code>
+        </p>
+
+        <p>
+            <strong>Upload Date (Bangladesh):</strong>
+            <code>
+                @{
+                    var bangladeshTime =
+                        TimeZoneInfo.ConvertTimeBySystemTimeZoneId(
+                            DateTime.SpecifyKind(
+                                Model.Evidence.UploadDate,
+                                DateTimeKind.Utc
+                            ),
+                            "Bangladesh Standard Time"
+                        );
+                }
+
+                @bangladeshTime.ToString("yyyy-MM-dd HH:mm:ss")
+            </code>
+        </p>
+
+        <p>
+            <strong>SHA256 Hash:</strong>
+            <br />
+            <small class="text-break">
+                @Model.Evidence.SHA256Hash
+            </small>
+        </p>
+
+    </div>
+</div>
+
+
+<!-- ========================================================= -->
+<!-- Analysis Summary -->
+<!-- ========================================================= -->
+@if (Model.AnalysisSession != null)
+{
+    <div class="card mb-4">
+        <div class="card-body">
+
+            <h4 class="mb-3">Analysis Summary</h4>
+
+            <div class="row">
+
+                <div class="col-md-4">
+                    <strong>Total Packets</strong>
+                    <h3>
+                        @Model.AnalysisSession.TotalPackets
+                    </h3>
+                </div>
+
+                <div class="col-md-4">
+                    <strong>Threats Detected</strong>
+                    <h3>
+                        @Model.AnalysisSession.SuspiciousEventCount
+                    </h3>
+                </div>
+
+                <div class="col-md-4">
+                    <strong>Analysis Date</strong>
+                    <p>
+                        @Model.AnalysisSession.AnalysisDate
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+}
+
+
+<!-- ========================================================= -->
+<!-- Bluetooth Devices -->
+<!-- ========================================================= -->
+
+<div class="card mb-4">
+    <div class="card-body">
+
+        <h4 class="mb-3">Bluetooth Devices</h4>
+
+        @if (Model.BluetoothDevices.Any())
+        {
+            <table class="table table-bordered table-hover">
+
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>MAC Address</th>
+                        <th>Device Name</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @{
+                        var deviceNumber = 1;
+                    }
+
+                    @foreach (var device in Model.BluetoothDevices)
+                    {
+                        <tr>
+                            <td>
+                                @deviceNumber
+                            </td>
+
+                            <td>
+                                <code>
+                                    @device.MacAddress
+                                </code>
+                            </td>
+
+                            <td>
+                                @device.DeviceName
+                            </td>
+                        </tr>
+
+                        deviceNumber++;
+                    }
+
+                </tbody>
+
+            </table>
+        }
+        else
+        {
+            <p class="text-muted">
+                No Bluetooth devices were detected.
+            </p>
+        }
+
+    </div>
+</div>
+
+
+<!-- ========================================================= -->
+<!-- Bluetooth Protocol Statistics -->
+<!-- ========================================================= -->
+@if (Model.ProtocolStatistics != null)
+{
+    <div class="card mb-4">
+        <div class="card-body">
+
+            <h4 class="mb-3">
+                Bluetooth Protocol Statistics
+            </h4>
+
+            <div class="row">
+
+                <div class="col-md-3 mb-3">
+                    <div class="border rounded p-3">
+                        <strong>HCI Commands</strong>
+                        <h4>
+                            @Model.ProtocolStatistics.HCICommandCount
+                        </h4>
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <div class="border rounded p-3">
+                        <strong>HCI Events</strong>
+                        <h4>
+                            @Model.ProtocolStatistics.HCIEventCount
+                        </h4>
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <div class="border rounded p-3">
+                        <strong>HCI ACL</strong>
+                        <h4>
+                            @Model.ProtocolStatistics.HCIACLCount
+                        </h4>
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <div class="border rounded p-3">
+                        <strong>L2CAP</strong>
+                        <h4>
+                            @Model.ProtocolStatistics.L2CAPCount
+                        </h4>
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <div class="border rounded p-3">
+                        <strong>RFCOMM</strong>
+                        <h4>
+                            @Model.ProtocolStatistics.RFCOMMCount
+                        </h4>
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <div class="border rounded p-3">
+                        <strong>OBEX</strong>
+                        <h4>
+                            @Model.ProtocolStatistics.OBEXCount
+                        </h4>
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <div class="border rounded p-3">
+                        <strong>SDP</strong>
+                        <h4>
+                            @Model.ProtocolStatistics.SDPCount
+                        </h4>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+}
+
+<!-- ========================================================= -->
+<!-- Protocol Distribution Chart -->
+<!-- ========================================================= -->
+@if (Model.ProtocolStatistics != null)
+{
+    <div class="card mb-4">
+        <div class="card-body">
+
+            <h4 class="mb-3">
+                Protocol Distribution
+            </h4>
+
+            <div style="position: relative; height: 400px;">
+                <canvas id="protocolDistributionChart"></canvas>
+            </div>
+
+        </div>
+    </div>
+}
+
+<!-- ========================================================= -->
+<!-- Capture Layer Frequency -->
+<!-- ========================================================= -->
+@if (Model.LayerFrequency.Any())
+{
+    <div class="card mb-4">
+        <div class="card-body">
+
+            <h4 class="mb-3">
+                Capture Layer Frequency
+            </h4>
+
+            <div style="position: relative; height: 450px;">
+                <canvas id="layerFrequencyChart"></canvas>
+            </div>
+
+        </div>
+    </div>
+}
+
+<!-- ========================================================= -->
+<!-- Bluetooth Communications -->
+<!-- ========================================================= -->
+
+<div class="card mb-4">
+    <div class="card-body">
+
+        <h4 class="mb-3">
+            Bluetooth Communication Graph
+        </h4>
+
+        @if (Model.Communications.Any())
+        {
+            <div id="communicationGraph"
+                 style="width: 100%; height: 550px; border: 1px solid #dee2e6; border-radius: 8px;">
+            </div>
+        }
+        else
+        {
+            <p class="text-muted">
+                No communication data is available for visualization.
+            </p>
+        }
+
+    </div>
+</div>
+
+
+<!-- ========================================================= -->
+<!-- Bluetooth Communications Table -->
+<!-- ========================================================= -->
+
+<div class="card mb-4">
+    <div class="card-body">
+
+        <h4 class="mb-3">
+            Bluetooth Communications
+        </h4>
+
+        @if (Model.Communications.Any())
+        {
+            <div class="table-responsive">
+
+                <table class="table table-bordered table-hover">
+
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Source</th>
+                            <th>Destination</th>
+                            <th>Packet Count</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        @{
+                            var communicationNumber = 1;
+                        }
+
+                        @foreach (var communication
+                            in Model.Communications)
+                        {
+                            <tr>
+
+                                <td>
+                                    @communicationNumber
+                                </td>
+
+                                <td>
+                                    <code>
+                                        @communication.Source
+                                    </code>
+                                </td>
+
+                                <td>
+                                    <code>
+                                        @communication.Destination
+                                    </code>
+                                </td>
+
+                                <td>
+                                    <strong>
+                                        @communication.Count
+                                    </strong>
+                                </td>
+
+                            </tr>
+
+                            communicationNumber++;
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+        }
+        else
+        {
+            <p class="text-muted">
+                No Bluetooth communication records were detected.
+            </p>
+        }
+
+    </div>
+</div>
+
+<!-- ========================================================= -->
+<!-- Forensic Event Timeline -->
+<!-- ========================================================= -->
+<div class="card mb-4">
+
+    <div class="card-body">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+
+            <div>
+                <h4 class="mb-1">
+                    Forensic Event Timeline
+                </h4>
+
+                <small class="text-muted">
+                    Chronological reconstruction of suspicious events
+                    using timestamps and packet positions from the
+                    original PCAP capture.
+                </small>
+            </div>
+
+            <span class="badge bg-dark">
+                @Model.AttackEvents.Count Events
+            </span>
+
+        </div>
+
+
+        @if (Model.AttackEvents.Any())
+        {
+            <!-- =====================================================
+                 Investigation Controls — Suspicious Events
+                 ===================================================== -->
+
+            <div class="border rounded p-3 mb-3 bg-light">
+                <div class="row g-3 align-items-end">
+
+                    <div class="col-lg-5">
+                        <label for="eventInvestigationSearch" class="form-label fw-semibold">
+                            Search Events
+                        </label>
+                        <input type="text"
+                               id="eventInvestigationSearch"
+                               class="form-control"
+                               placeholder="Attack type, description, device, packet..."
+                               autocomplete="off" />
+                    </div>
+
+                    <div class="col-md-4 col-lg-2">
+                        <label for="eventSeverityFilter" class="form-label fw-semibold">
+                            Severity
+                        </label>
+                        <select id="eventSeverityFilter" class="form-select">
+                            <option value="all">All</option>
+                            <option value="high">High</option>
+                            <option value="medium">Medium</option>
+                            <option value="low">Low</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4 col-lg-3">
+                        <label for="eventTypeFilter" class="form-label fw-semibold">
+                            Event Type
+                        </label>
+                        <select id="eventTypeFilter" class="form-select">
+                            <option value="all">All</option>
+                            @foreach (var eventType in Model.AttackEvents
+                                .Select(x => x.AttackType)
+                                .Where(x => !string.IsNullOrWhiteSpace(x))
+                                .Distinct()
+                                .OrderBy(x => x))
+                            {
+                                <option value="@eventType.ToLowerInvariant()">
+                                    @eventType
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-4 col-lg-2">
+                        <button type="button"
+                                id="clearEventFilters"
+                                class="btn btn-outline-secondary w-100">
+                            Clear Filters
+                        </button>
+                    </div>
+
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <small class="text-muted">
+                        Filter the forensic timeline by event type, severity, or investigation text.
+                    </small>
+                    <span id="eventFilterResult" class="badge bg-secondary">
+                        Showing @Model.AttackEvents.Count of @Model.AttackEvents.Count
+                    </span>
+                </div>
+            </div>
+
+            <div class="forensic-timeline">
+                @foreach (var threat in Model.AttackEvents
+                    .OrderBy(x => x.Timestamp)
+                    .ThenBy(x => x.PacketNumber))
+                {
+                    var severityClass =
+                        threat.Severity == "High"
+                            ? "timeline-high"
+                            : threat.Severity == "Medium"
+                                ? "timeline-medium"
+                                : threat.Severity == "Low"
+                                    ? "timeline-low"
+                                    : "timeline-default";
+
+                    var severityBadge =
+                        threat.Severity == "High"
+                            ? "bg-danger"
+                            : threat.Severity == "Medium"
+                                ? "bg-warning text-dark"
+                                : threat.Severity == "Low"
+                                    ? "bg-info text-dark"
+                                    : "bg-secondary";
+
+                    var correlatedPacket =
+                        Model.SuspiciousPackets
+                            .FirstOrDefault(
+                                x => x.PacketNumber == threat.PacketNumber
+                            );
+
+                    <div class="forensic-timeline-item investigation-event-row"
+                         data-event-type="@threat.AttackType.ToLowerInvariant()"
+                         data-event-severity="@threat.Severity.ToLowerInvariant()"
+                         data-event-source="@threat.Source.ToLowerInvariant()"
+                         data-event-destination="@threat.Destination.ToLowerInvariant()"
+                         data-event-search="@((threat.AttackType + " " + threat.Description + " " + threat.Source + " " + threat.Destination + " " + threat.PacketNumber).ToLowerInvariant())">
+
+                        <!-- Timeline marker -->
+                        <div class="forensic-timeline-marker
+                            @severityClass">
+                        </div>
+
+
+                        <!-- Event card -->
+                        <div class="card border-0 shadow-sm
+                            forensic-event-card
+                            @severityClass">
+
+                            <div class="card-body">
+
+                                <!-- Event header -->
+                                <div class="d-flex
+                                    justify-content-between
+                                    align-items-start
+                                    flex-wrap
+                                    gap-2">
+
+                                    <div>
+
+                                        <h5 class="mb-1">
+                                            @threat.AttackType
+                                        </h5>
+
+                                        <span class="badge @severityBadge">
+                                            @threat.Severity
+                                        </span>
+
+                                    </div>
+
+
+                                    <div class="text-end">
+
+                                        <span class="badge bg-secondary">
+                                            Packet #@threat.PacketNumber
+                                        </span>
+
+                                        <div class="mt-1">
+
+                                            <small class="text-muted">
+                                                PCAP Evidence
+                                            </small>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+
+                                <hr />
+
+                                <!-- ========================================================= -->
+                                <!--  Observed Evidence -->
+                                <!-- ========================================================= -->
+
+                                <div class="mt-3">
+
+                                    <div class="d-flex align-items-center mb-2">
+                                        <h6 class="mb-0">
+                                            <i class="bi bi-database"></i>
+                                            Observed Evidence
+                                        </h6>
+                                    </div>
+
+                                    <div class="row g-3">
+
+                                        <!-- Packet Number -->
+                                        <div class="col-md-3">
+
+                                            <small class="text-muted d-block">
+                                                Packet Number
+                                            </small>
+
+                                            <span class="badge bg-secondary">
+                                                #@threat.PacketNumber
+                                            </span>
+
+                                        </div>
+
+
+                                        <!-- Timestamp -->
+                                        <div class="col-md-3">
+
+                                            <small class="text-muted d-block">
+                                                PCAP Timestamp
+                                            </small>
+
+                                            <code>
+                                                @threat.Timestamp.ToString(
+                                                    "yyyy-MM-dd HH\\:mm\\:ss.fff"
+                                                )
+                                            </code>
+
+                                        </div>
+
+
+                                        <!-- Source --> 
+                                        <div class="col-md-3">
+
+                                            <small class="text-muted d-block">
+                                                Source
+                                            </small>
+
+                                            <code>
+                                                @threat.Source
+                                            </code>
+
+                                        </div>
+
+
+                                        <!-- Destination -->
+                                        <div class="col-md-3">
+
+                                            <small class="text-muted d-block">
+                                                Destination
+                                            </small>
+
+                                            <code>
+                                                @threat.Destination
+                                            </code>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+
+                                <hr class="my-4" />
+
+                                
+                                <!-- ========================================================= -->
+                                <!-- Analytical Interpretation -->
+                                <!-- ========================================================= -->
+
+                                <div>
+
+                                    <div class="d-flex align-items-center mb-2">
+
+                                        <h6 class="mb-0">
+                                            <i class="bi bi-search"></i>
+                                            Analytical Interpretation
+                                        </h6>
+
+                                    </div>
+
+
+                                    <div class="row g-3">
+
+                                        <!-- Classification -->
+                                        <div class="col-md-4">
+
+                                            <small class="text-muted d-block">
+                                                Classification
+                                            </small>
+
+                                            <strong>
+                                                @threat.AttackType
+                                            </strong>
+
+                                        </div>
+
+
+                                        <!-- Severity -->
+                                        <div class="col-md-4">
+
+                                            <small class="text-muted d-block">
+                                                Severity
+                                            </small>
+
+                                            <span class="badge @severityBadge">
+                                                @threat.Severity
+                                            </span>
+
+                                        </div>
+
+
+                                        <!-- Correlated Packet -->
+                                        <div class="col-md-4">
+
+                                            <small class="text-muted d-block">
+                                                Correlated Packet
+                                            </small>
+
+                                            @if (correlatedPacket != null)
+                                            {
+                                                <span class="badge bg-success">
+                                                    Packet #@correlatedPacket.PacketNumber
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">
+                                                    Packet data unavailable
+                                                </span>
+                                            }
+
+                                        </div>
+
+                                    </div>
+
+
+                                    <!-- Analytical Reason -->
+                                    <div class="mt-3">
+
+                                        <small class="text-muted d-block mb-1">
+                                            Analytical Reason
+                                        </small>
+
+                                        <div class="alert alert-light border mb-0">
+
+                                            @threat.Description
+
+                                        </div>
+
+                                    </div>
+                                    @if (correlatedPacket != null)
+                                    {
+                                        <div class="mt-4">
+
+                                            <div class="d-flex align-items-center mb-2">
+
+                                                <h6 class="mb-0">
+                                                    <i class="bi bi-box-arrow-in-right"></i>
+                                                    Correlated Packet Evidence
+                                                </h6>
+
+                                            </div>
+
+
+                                            <div class="card border bg-light">
+
+                                                <div class="card-body">
+
+                                                    <div class="row g-3">
+
+                                                        <!-- Packet Number -->
+                                                        <div class="col-md-3">
+
+                                                            <small class="text-muted d-block">
+                                                                Packet Number
+                                                            </small>
+
+                                                            <strong>
+                                                                #@correlatedPacket.PacketNumber
+                                                            </strong>
+
+                                                        </div>
+
+
+                                                        <!-- Protocol -->
+                                                        <div class="col-md-3">
+
+                                                            <small class="text-muted d-block">
+                                                                Protocol
+                                                            </small>
+
+                                                            <span class="badge bg-primary">
+                                                                @correlatedPacket.Protocol
+                                                            </span>
+
+                                                        </div>
+
+
+                                                        <!-- Packet Length -->
+                                                        <div class="col-md-3">
+
+                                                            <small class="text-muted d-block">
+                                                                Packet Length
+                                                            </small>
+
+                                                            <strong>
+                                                                @correlatedPacket.PacketLength bytes
+                                                            </strong>
+
+                                                        </div>
+
+
+                                                        <!-- Severity -->
+                                                        <div class="col-md-3">
+
+                                                            <small class="text-muted d-block">
+                                                                Packet Severity
+                                                            </small>
+
+                                                            <span class="badge @severityBadge">
+                                                                @correlatedPacket.Severity
+                                                            </span>
+
+                                                        </div>
+
+
+                                                        <!-- Timestamp -->
+                                                        <div class="col-md-6">
+
+                                                            <small class="text-muted d-block">
+                                                                Packet Timestamp
+                                                            </small>
+
+                                                            <code>
+                                                                @correlatedPacket.Timestamp.ToString(
+                                                                    "yyyy-MM-dd HH\\:mm\\:ss.fff"
+                                                                )
+                                                            </code>
+
+                                                        </div>
+
+
+                                                        <!-- Source -->
+                                                        <div class="col-md-6">
+
+                                                            <small class="text-muted d-block">
+                                                                Source
+                                                            </small>
+
+                                                            <code>
+                                                                @correlatedPacket.Source
+                                                            </code>
+
+                                                        </div>
+
+
+                                                        <!-- Destination -->
+                                                        <div class="col-md-6">
+
+                                                            <small class="text-muted d-block">
+                                                                Destination
+                                                            </small>
+
+                                                            <code>
+                                                                @correlatedPacket.Destination
+                                                            </code>
+
+                                                        </div>
+
+
+                                                        <!-- Reason -->
+                                                        <div class="col-md-6">
+
+                                                            <small class="text-muted d-block">
+                                                                Detection Reason
+                                                            </small>
+
+                                                            <span>
+                                                                @correlatedPacket.Reason
+                                                            </span>
+
+                                                        </div>
+
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+                                    }
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                }
+
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-success mb-0">
+
+                <strong>
+                    No suspicious events detected.
+                </strong>
+
+                <br />
+
+                The analyzed capture did not produce any events
+                classified as suspicious.
+
+            </div>
+        }
+
+    </div>
+
+</div>
+
+<!-- =========================================================
+     Forensic Evidence Correlation
+     ========================================================= -->
+
+<div class="card mb-4">
+
+    <div class="card-body">
+
+        <div class="d-flex justify-content-between
+            align-items-center mb-3">
+
+            <div>
+
+                <h4 class="mb-1">
+                    Forensic Evidence Correlation
+                </h4>
+
+                <small class="text-muted">
+                    Correlation of evidence artifacts identified
+                    during analysis of the original PCAP capture.
+                </small>
+
+            </div>
+
+            <span class="badge bg-dark">
+                Evidence #@Model.Evidence.Id
+            </span>
+
+        </div>
+
+
+        <!-- =====================================================
+             Correlation Chain
+             ===================================================== -->
+
+        <div class="row g-3">
+
+            <!-- PCAP -->
+            <div class="col-md-6 col-lg-3">
+
+                <div class="border rounded p-3 h-100">
+
+                    <small class="text-muted d-block">
+                        Evidence File
+                    </small>
+
+                    <h5 class="mb-1">
+                        PCAP
+                    </h5>
+
+                    <div class="text-break">
+                        @Model.Evidence.FileName
+                    </div>
+
+                    <small class="text-muted">
+                        SHA256 verified evidence
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <!-- Packets -->
+            <div class="col-md-6 col-lg-3">
+
+                <div class="border rounded p-3 h-100">
+
+                    <small class="text-muted d-block">
+                        Suspicious Packets
+                    </small>
+
+                    <h3 class="mb-1">
+                        @Model.CorrelatedPacketCount
+                    </h3>
+
+                    <small class="text-muted">
+                        Packet-level evidence
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <!-- Devices -->
+            <div class="col-md-6 col-lg-3">
+
+                <div class="border rounded p-3 h-100">
+
+                    <small class="text-muted d-block">
+                        Bluetooth Devices
+                    </small>
+
+                    <h3 class="mb-1">
+                        @Model.CorrelatedDeviceCount
+                    </h3>
+
+                    <small class="text-muted">
+                        Identified in capture
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <!-- Communications -->
+            <div class="col-md-6 col-lg-3">
+
+                <div class="border rounded p-3 h-100">
+
+                    <small class="text-muted d-block">
+                        Communications
+                    </small>
+
+                    <h3 class="mb-1">
+                        @Model.CorrelatedCommunicationCount
+                    </h3>
+
+                    <small class="text-muted">
+                        Device communication records
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <hr class="my-4" />
+
+
+        <!-- =====================================================
+             Protocols
+             ===================================================== -->
+
+        <div class="mb-4">
+
+            <h6 class="mb-2">
+                Correlated Protocols
+            </h6>
+
+            @if (Model.CorrelatedProtocols.Any())
+            {
+                @foreach (var protocol
+                    in Model.CorrelatedProtocols)
+                {
+                    <span class="badge bg-primary me-1 mb-1">
+                        @protocol
+                    </span>
+                }
+            }
+            else
+            {
+                <span class="text-muted">
+                    No protocol information available.
+                </span>
+            }
+
+        </div>
+
+
+        <!-- =====================================================
+             Suspicious Events
+             ===================================================== -->
+
+        <div>
+
+            <h6 class="mb-2">
+                Suspicious Events
+            </h6>
+
+            <div class="d-flex align-items-center">
+
+                <span class="badge bg-danger me-2">
+                    @Model.CorrelatedEventCount
+                </span>
+
+                <span class="text-muted">
+                    analytical events associated with this evidence
+                    file
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <hr class="my-4" />
+
+
+        <!-- =====================================================
+             Investigation Chain
+             ===================================================== -->
+
+        <div>
+
+            <h6 class="mb-3">
+                Investigation Chain
+            </h6>
+
+            <div class="forensic-correlation-chain">
+
+                <span class="correlation-step">
+                    PCAP Evidence
+                </span>
+
+                <span class="correlation-arrow">
+                    →
+                </span>
+
+                <span class="correlation-step">
+                    Packet
+                </span>
+
+                <span class="correlation-arrow">
+                    →
+                </span>
+
+                <span class="correlation-step">
+                    Protocol
+                </span>
+
+                <span class="correlation-arrow">
+                    →
+                </span>
+
+                <span class="correlation-step">
+                    Device
+                </span>
+
+                <span class="correlation-arrow">
+                    →
+                </span>
+
+                <span class="correlation-step">
+                    Communication
+                </span>
+
+                <span class="correlation-arrow">
+                    →
+                </span>
+
+                <span class="correlation-step">
+                    Suspicious Event
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ========================================================= -->
+<!-- Suspicious Packet Investigation -->
+<!-- ========================================================= -->
+
+<div class="card mb-4">
+
+    <div class="card-body">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+
+            <div>
+                <h4 class="mb-1">
+                    Suspicious Packet Investigation
+                </h4>
+
+                <small class="text-muted">
+                    Packet-level forensic evidence identified
+                    during analysis of the original PCAP capture.
+                </small>
+            </div>
+
+            <span class="badge bg-danger">
+                @Model.SuspiciousPackets.Count Suspicious Packets
+            </span>
+
+        </div>
+
+
+        @if (Model.SuspiciousPackets.Any())
+        {
+            <!-- =====================================================
+                 Investigation Controls — Step 6D
+                 ===================================================== -->
+
+            <div class="border rounded p-3 mb-3 bg-light">
+
+                <div class="row g-3 align-items-end">
+
+                    <div class="col-lg-4">
+                        <label for="packetInvestigationSearch" class="form-label fw-semibold">
+                            Search
+                        </label>
+                        <input type="text"
+                               id="packetInvestigationSearch"
+                               class="form-control"
+                               placeholder="Packet, source, destination, reason..."
+                               autocomplete="off" />
+                    </div>
+
+                    <div class="col-md-4 col-lg-2">
+                        <label for="packetSeverityFilter" class="form-label fw-semibold">
+                            Severity
+                        </label>
+                        <select id="packetSeverityFilter" class="form-select">
+                            <option value="all">All</option>
+                            <option value="high">High</option>
+                            <option value="medium">Medium</option>
+                            <option value="low">Low</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4 col-lg-2">
+                        <label for="packetProtocolFilter" class="form-label fw-semibold">
+                            Protocol
+                        </label>
+                        <select id="packetProtocolFilter" class="form-select">
+                            <option value="all">All</option>
+                            @foreach (var protocol in Model.SuspiciousPackets
+                                .Select(x => x.Protocol)
+                                .Where(x => !string.IsNullOrWhiteSpace(x))
+                                .Distinct()
+                                .OrderBy(x => x))
+                            {
+                                <option value="@protocol.ToLowerInvariant()">
+                                    @protocol
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-4 col-lg-2">
+                        <label for="packetDeviceFilter" class="form-label fw-semibold">
+                            Device
+                        </label>
+                        <select id="packetDeviceFilter" class="form-select">
+                            <option value="all">All</option>
+                            @foreach (var device in Model.SuspiciousPackets
+                                .SelectMany(x => new[] { x.Source, x.Destination })
+                                .Where(x => !string.IsNullOrWhiteSpace(x))
+                                .Distinct()
+                                .OrderBy(x => x))
+                            {
+                                <option value="@device.ToLowerInvariant()">
+                                    @device
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-4 col-lg-2">
+                        <button type="button"
+                                id="clearPacketFilters"
+                                class="btn btn-outline-secondary w-100">
+                            Clear Filters
+                        </button>
+                    </div>
+
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <small class="text-muted">
+                        Filter suspicious packet evidence by severity, protocol, device, or text.
+                    </small>
+                    <span id="packetFilterResult" class="badge bg-secondary">
+                        Showing @Model.SuspiciousPackets.Count of @Model.SuspiciousPackets.Count
+                    </span>
+                </div>
+
+            </div>
+
+            <div class="table-responsive">
+
+                <table class="table table-bordered table-hover align-middle">
+
+                    <thead class="table-dark">
+
+                        <tr>
+
+                            <th>#</th>
+
+                            <th>Packet</th>
+
+                            <th>Timestamp</th>
+
+                            <th>Protocol</th>
+
+                            <th>Source</th>
+
+                            <th>Destination</th>
+
+                            <th>Length</th>
+
+                            <th>Severity</th>
+
+                            <th>Reason</th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        @foreach (var packet in Model.SuspiciousPackets)
+                        {
+                            var severityClass =
+                                packet.Severity == "High"
+                                    ? "table-danger"
+                                    : packet.Severity == "Medium"
+                                        ? "table-warning"
+                                        : packet.Severity == "Low"
+                                            ? "table-info"
+                                            : "";
+
+                            var severityBadge =
+                                packet.Severity == "High"
+                                    ? "bg-danger"
+                                    : packet.Severity == "Medium"
+                                        ? "bg-warning text-dark"
+                                        : packet.Severity == "Low"
+                                            ? "bg-info text-dark"
+                                            : "bg-secondary";
+
+
+                            <tr class="@severityClass suspicious-packet-row"
+                                data-packet="@packet.PacketNumber"
+                                data-protocol="@packet.Protocol.ToLowerInvariant()"
+                                data-source="@packet.Source.ToLowerInvariant()"
+                                data-destination="@packet.Destination.ToLowerInvariant()"
+                                data-severity="@packet.Severity.ToLowerInvariant()"
+                                data-reason="@packet.Reason.ToLowerInvariant()">
+
+                                <!-- Row Number -->
+
+                                <td>
+                                    @(
+                                        Model.SuspiciousPackets
+                                            .IndexOf(packet) + 1
+                                    )
+                                </td>
+
+
+                                <!-- Packet Number -->
+
+                                <td>
+                                    <span class="badge bg-secondary">
+                                        #@packet.PacketNumber
+                                    </span>
+                                </td>
+
+
+                                <!-- Timestamp -->
+
+                                <td>
+                                    <code class="text-nowrap">
+                                        @packet.Timestamp.ToString(
+                                            "yyyy-MM-dd HH:mm:ss.fff"
+                                        )
+                                    </code>
+                                </td>
+
+
+                                <!-- Protocol -->
+
+                                <td>
+                                    <strong>
+                                        @packet.Protocol
+                                    </strong>
+                                </td>
+
+
+                                <!-- Source -->
+
+                                <td>
+                                    <code>
+                                        @packet.Source
+                                    </code>
+                                </td>
+
+
+                                <!-- Destination -->
+
+                                <td>
+                                    <code>
+                                        @packet.Destination
+                                    </code>
+                                </td>
+
+
+                                <!-- Packet Length -->
+
+                                <td class="text-nowrap">
+                                    @packet.PacketLength bytes
+                                </td>
+
+
+                                <!-- Severity -->
+
+                                <td>
+                                    <span class="badge @severityBadge">
+                                        @packet.Severity
+                                    </span>
+                                </td>
+
+
+                                <!-- Reason -->
+
+                                <td>
+                                    @packet.Reason
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-success mb-0">
+
+                <strong>
+                    No suspicious packets detected.
+                </strong>
+
+                <br />
+
+                The analyzed capture did not contain any
+                packets classified as suspicious.
+
+            </div>
+        }
+
+    </div>
+
+</div>
+
+@section Scripts
+{
+    <!-- Cytoscape.js -->
+    <script src="https://unpkg.com/cytoscape@3.30.4/dist/cytoscape.min.js"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- ===================================================== -->
+    <!-- Step 6D — Investigation UI Filters -->
+    <!-- ===================================================== -->
+
+    <script>
+
+        document.addEventListener("DOMContentLoaded", function() {
+            // =================================================
+            // Suspicious Packet Investigation
+            // =================================================
+
+            const packetSearch =
+                document.getElementById("packetInvestigationSearch");
+
+            const packetSeverity =
+                document.getElementById("packetSeverityFilter");
+
+            const packetProtocol =
+                document.getElementById("packetProtocolFilter");
+
+            const packetDevice =
+                document.getElementById("packetDeviceFilter");
+
+            const packetClear =
+                document.getElementById("clearPacketFilters");
+
+            const packetResult =
+                document.getElementById("packetFilterResult");
+
+            const packetRows =
+                Array.from(
+                    document.querySelectorAll(".suspicious-packet-row")
+                );
+
+            function filterPackets() {
+                const search =
+                    (packetSearch?.value || "").trim().toLowerCase();
+
+                const severity =
+                    packetSeverity?.value || "all";
+
+                const protocol =
+                    packetProtocol?.value || "all";
+
+                const device =
+                    packetDevice?.value || "all";
+
+                let visibleCount = 0;
+
+                packetRows.forEach(function(row) {
+                    const rowText =
+                        row.innerText.toLowerCase();
+
+                    const rowSeverity =
+                        row.dataset.severity || "";
+
+                    const rowProtocol =
+                        row.dataset.protocol || "";
+
+                    const rowSource =
+                        row.dataset.source || "";
+
+                    const rowDestination =
+                        row.dataset.destination || "";
+
+                    const matchesSearch =
+                        search === "" || rowText.includes(search);
+
+                    const matchesSeverity =
+                        severity === "all" || rowSeverity === severity;
+
+                    const matchesProtocol =
+                        protocol === "all" || rowProtocol === protocol;
+
+                    const matchesDevice =
+                        device === "all" ||
+                        rowSource === device ||
+                        rowDestination === device;
+
+                    const visible =
+                        matchesSearch &&
+                        matchesSeverity &&
+                        matchesProtocol &&
+                        matchesDevice;
+
+                    row.style.display = visible ? "" : "none";
+
+                    if (visible) {
+                        visibleCount++;
+                    }
+                });
+
+                if (packetResult) {
+                    packetResult.textContent =
+                        `Showing ${visibleCount} of ${packetRows.length}`;
+
+                    packetResult.className =
+                        visibleCount > 0
+                            ? "badge bg-secondary"
+                            : "badge bg-danger";
+                }
+            }
+
+            [
+                packetSearch,
+                packetSeverity,
+                packetProtocol,
+                packetDevice
+            ].forEach(function(element) {
+                if (!element) return;
+
+                element.addEventListener(
+                    element.tagName === "INPUT"
+                        ? "input"
+                        : "change",
+                    filterPackets
+                );
+            });
+
+            packetClear?.addEventListener("click", function() {
+                if (packetSearch) packetSearch.value = "";
+                if (packetSeverity) packetSeverity.value = "all";
+                if (packetProtocol) packetProtocol.value = "all";
+                if (packetDevice) packetDevice.value = "all";
+
+                filterPackets();
+            });
+
+
+            // =================================================
+            // Suspicious Event Investigation
+            // =================================================
+
+            const eventSearch =
+                document.getElementById("eventInvestigationSearch");
+
+            const eventSeverity =
+                document.getElementById("eventSeverityFilter");
+
+            const eventType =
+                document.getElementById("eventTypeFilter");
+
+            const eventClear =
+                document.getElementById("clearEventFilters");
+
+            const eventResult =
+                document.getElementById("eventFilterResult");
+
+            const eventRows =
+                Array.from(
+                    document.querySelectorAll(".investigation-event-row")
+                );
+
+            function filterEvents() {
+                const search =
+                    (eventSearch?.value || "").trim().toLowerCase();
+
+                const severity =
+                    eventSeverity?.value || "all";
+
+                const type =
+                    eventType?.value || "all";
+
+                let visibleCount = 0;
+
+                eventRows.forEach(function(row) {
+                    const searchableText =
+                        row.dataset.eventSearch ||
+                        row.innerText.toLowerCase();
+
+                    const rowSeverity =
+                        row.dataset.eventSeverity || "";
+
+                    const rowType =
+                        row.dataset.eventType || "";
+
+                    const matchesSearch =
+                        search === "" ||
+                        searchableText.includes(search);
+
+                    const matchesSeverity =
+                        severity === "all" ||
+                        rowSeverity === severity;
+
+                    const matchesType =
+                        type === "all" ||
+                        rowType === type;
+
+                    const visible =
+                        matchesSearch &&
+                        matchesSeverity &&
+                        matchesType;
+
+                    row.style.display = visible ? "" : "none";
+
+                    if (visible) {
+                        visibleCount++;
+                    }
+                });
+
+                if (eventResult) {
+                    eventResult.textContent =
+                        `Showing ${visibleCount} of ${eventRows.length}`;
+
+                    eventResult.className =
+                        visibleCount > 0
+                            ? "badge bg-secondary"
+                            : "badge bg-danger";
+                }
+            }
+
+            [
+                eventSearch,
+                eventSeverity,
+                eventType
+            ].forEach(function(element) {
+                if (!element) return;
+
+                element.addEventListener(
+                    element.tagName === "INPUT"
+                        ? "input"
+                        : "change",
+                    filterEvents
+                );
+            });
+
+            eventClear?.addEventListener("click", function() {
+                if (eventSearch) eventSearch.value = "";
+                if (eventSeverity) eventSeverity.value = "all";
+                if (eventType) eventType.value = "all";
+
+                filterEvents();
+            });
+        });
+
+    </script>
+
+
+    <!-- ===================================================== -->
+    <!-- Bluetooth Communication Graph -->
+    <!-- ===================================================== -->
+
+    <script>
+
+        const communicationData = @Html.Raw(
+                    System.Text.Json.JsonSerializer.Serialize(
+                    Model.Communications
+                    )
+                    );
+
+        const devices = @Html.Raw(
+                                    System.Text.Json.JsonSerializer.Serialize(
+                                            Model.BluetoothDevices
+                                                    .Select(x => x.MacAddress)
+                    .Distinct()
+                    .ToList()
+                    )
+                    );
+
+
+        console.log(
+            "Communication Data:",
+            communicationData
+        );
+
+        console.log(
+            "Bluetooth Devices:",
+            devices
+        );
+
+
+        if (typeof cytoscape === "undefined") {
+            console.error(
+                "Cytoscape.js could not be loaded."
+            );
+        }
+        else if (communicationData.length === 0) {
+            console.warn(
+                "No Bluetooth communication data found."
+            );
+        }
+        else {
+
+            const nodes = [];
+
+            const nodeSet = new Set();
+
+
+            // ================================================
+            // Create Nodes
+            // ================================================
+
+            devices.forEach(function(device) {
+
+                if (!nodeSet.has(device)) {
+                    nodeSet.add(device);
+
+                    nodes.push({
+
+                        data:
+                        {
+                            id: device,
+
+                            label: device
+                        }
+
+                    });
+                }
+
+            });
+
+
+            // ================================================
+            // Create Edges
+            // ================================================
+
+            const edges = [];
+
+
+            communicationData.forEach(
+                function(communication, index) {
+
+                    const source =
+                        communication.Source;
+
+                    const destination =
+                        communication.Destination;
+
+                    const count =
+                        communication.Count;
+
+
+                    if (!nodeSet.has(source)) {
+                        nodeSet.add(source);
+
+                        nodes.push({
+
+                            data:
+                            {
+                                id: source,
+
+                                label: source
+                            }
+
+                        });
+                    }
+
+
+                    if (!nodeSet.has(destination)) {
+                        nodeSet.add(destination);
+
+                        nodes.push({
+
+                            data:
+                            {
+                                id: destination,
+
+                                label: destination
+                            }
+
+                        });
+                    }
+
+
+                    edges.push({
+
+                        data:
+                        {
+                            id:
+                                "edge-" + index,
+
+                            source:
+                                source,
+
+                            target:
+                                destination,
+
+                            label:
+                                count + " packets",
+
+                            count:
+                                count
+                        }
+
+                    });
+
+                }
+            );
+
+
+            // ================================================
+            // Create Communication Graph
+            // ================================================
+
+            const cy = cytoscape({
+
+                container:
+                    document.getElementById(
+                        "communicationGraph"
+                    ),
+
+                elements:
+                {
+                    nodes: nodes,
+
+                    edges: edges
+                },
+
+
+                style:
+                    [
+
+                        {
+                            selector: "node",
+
+                            style:
+                            {
+                                "label":
+                                    "data(label)",
+
+                                "text-valign":
+                                    "center",
+
+                                "text-halign":
+                                    "center",
+
+                                "background-color":
+                                    "#0d6efd",
+
+                                "color":
+                                    "#ffffff",
+
+                                "width":
+                                    "90px",
+
+                                "height":
+                                    "90px",
+
+                                "font-size":
+                                    "11px",
+
+                                "font-weight":
+                                    "bold",
+
+                                "text-wrap":
+                                    "wrap",
+
+                                "text-max-width":
+                                    "80px"
+                            }
+                        },
+
+
+                        {
+                            selector: "edge",
+
+                            style:
+                            {
+                                "width":
+                                    3,
+
+                                "line-color":
+                                    "#6c757d",
+
+                                "target-arrow-color":
+                                    "#6c757d",
+
+                                "target-arrow-shape":
+                                    "triangle",
+
+                                "curve-style":
+                                    "bezier",
+
+                                "label":
+                                    "data(label)",
+
+                                "font-size":
+                                    "10px",
+
+                                "color":
+                                    "#212529",
+
+                                "text-background-color":
+                                    "#ffffff",
+
+                                "text-background-opacity":
+                                    1,
+
+                                "text-background-padding":
+                                    "3px"
+                            }
+                        }
+
+                    ],
+
+
+                layout:
+                {
+                    name:
+                        "cose",
+
+                    animate:
+                        true,
+
+                    padding:
+                        50,
+
+                    nodeRepulsion:
+                        8000,
+
+                    idealEdgeLength:
+                        180,
+
+                    edgeElasticity:
+                        100
+                }
+
+            });
+
+
+            // ================================================
+            // Node Click
+            // ================================================
+
+            cy.on(
+                "tap",
+                "node",
+                function(event) {
+
+                    const node =
+                        event.target;
+
+                    alert(
+                        "Bluetooth Device:\n\n" +
+                        node.data("label")
+                    );
+
+                }
+            );
+
+
+            // ================================================
+            // Edge Click
+            // ================================================
+
+            cy.on(
+                "tap",
+                "edge",
+                function(event) {
+
+                    const edge =
+                        event.target;
+
+                    const source =
+                        edge.data("source");
+
+                    const target =
+                        edge.data("target");
+
+                    const count =
+                        edge.data("count");
+
+
+                    alert(
+                        "Bluetooth Communication\n\n" +
+                        "Source: " +
+                        source +
+                        "\nDestination: " +
+                        target +
+                        "\nPackets: " +
+                        count
+                    );
+
+                }
+            );
+
+        }
+
+    </script>
+
+
+    <!-- ===================================================== -->
+    <!-- Protocol Distribution Chart -->
+    <!-- ===================================================== -->
+    @if (Model.ProtocolStatistics != null)
+    {
+        <script>
+
+            const protocolStatistics =
+                @Html.Raw(
+                System.Text.Json.JsonSerializer.Serialize(
+                Model.ProtocolStatistics
+                )
+                );
+
+
+            console.log(
+                "Protocol Statistics:",
+                protocolStatistics
+            );
+
+
+            const protocolLabels =
+                [
+                    "HCI Commands",
+                    "HCI Events",
+                    "HCI ACL",
+                    "L2CAP",
+                    "RFCOMM",
+                    "OBEX",
+                    "SDP"
+                ];
+
+
+            const protocolValues =
+                [
+                    protocolStatistics.HCICommandCount,
+                    protocolStatistics.HCIEventCount,
+                    protocolStatistics.HCIACLCount,
+                    protocolStatistics.L2CAPCount,
+                    protocolStatistics.RFCOMMCount,
+                    protocolStatistics.OBEXCount,
+                    protocolStatistics.SDPCount
+                ];
+
+
+            const protocolCanvas =
+                document.getElementById(
+                    "protocolDistributionChart"
+                );
+
+
+            if (
+                protocolCanvas &&
+                typeof Chart !== "undefined"
+            ) {
+
+                new Chart(
+                    protocolCanvas,
+                    {
+                        type: "bar",
+
+                        data:
+                        {
+                            labels:
+                                protocolLabels,
+
+                            datasets:
+                                [
+                                    {
+                                        label:
+                                            "Packet Count",
+
+                                        data:
+                                            protocolValues
+                                    }
+                                ]
+                        },
+
+                        options:
+                        {
+                            responsive:
+                                true,
+
+                            maintainAspectRatio:
+                                false,
+
+                            plugins:
+                            {
+                                legend:
+                                {
+                                    display:
+                                        true
+                                },
+
+                                tooltip:
+                                {
+                                    enabled:
+                                        true
+                                }
+                            },
+
+                            scales:
+                            {
+                                y:
+                                {
+                                    beginAtZero:
+                                        true,
+
+                                    ticks:
+                                    {
+                                        precision:
+                                            0
+                                    },
+
+                                    title:
+                                    {
+                                        display:
+                                            true,
+
+                                        text:
+                                            "Packet Count"
+                                    }
+                                },
+
+                                x:
+                                {
+                                    title:
+                                    {
+                                        display:
+                                            true,
+
+                                        text:
+                                            "Bluetooth Protocol"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                );
+
+            }
+            else {
+                console.error(
+                    "Chart.js or protocol canvas was not found."
+                );
+            }
+
+        </script>
+    }
+
+    @if (Model.LayerFrequency.Any())
+    {
+        <script>
+
+            const layerFrequency =
+                @Html.Raw(
+                System.Text.Json.JsonSerializer.Serialize(
+                Model.LayerFrequency
+                )
+                );
+
+
+            console.log(
+                "Layer Frequency:",
+                layerFrequency
+            );
+
+
+            const layerLabels =
+                Object.keys(layerFrequency);
+
+
+            const layerValues =
+                Object.values(layerFrequency);
+
+
+            const layerCanvas =
+                document.getElementById(
+                    "layerFrequencyChart"
+                );
+
+
+            if (
+                layerCanvas &&
+                typeof Chart !== "undefined"
+            ) {
+
+                new Chart(
+                    layerCanvas,
+                    {
+                        type: "bar",
+
+                        data:
+                        {
+                            labels:
+                                layerLabels,
+
+                            datasets:
+                                [
+                                    {
+                                        label:
+                                            "Packet Frequency",
+
+                                        data:
+                                            layerValues
+                                    }
+                                ]
+                        },
+
+                        options:
+                        {
+                            responsive:
+                                true,
+
+                            maintainAspectRatio:
+                                false,
+
+                            plugins:
+                            {
+                                legend:
+                                {
+                                    display:
+                                        true
+                                },
+
+                                tooltip:
+                                {
+                                    enabled:
+                                        true
+                                }
+                            },
+
+                            scales:
+                            {
+                                y:
+                                {
+                                    beginAtZero:
+                                        true,
+
+                                    ticks:
+                                    {
+                                        precision:
+                                            0
+                                    },
+
+                                    title:
+                                    {
+                                        display:
+                                            true,
+
+                                        text:
+                                            "Packet Count"
+                                    }
+                                },
+
+                                x:
+                                {
+                                    title:
+                                    {
+                                        display:
+                                            true,
+
+                                        text:
+                                            "Capture Layer"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                );
+
+            }
+            else {
+                console.error(
+                    "Chart.js or layer frequency canvas was not found."
+                );
+            }
+
+        </script>
+    }
+
+    <style>
+
+        /* =========================================================
+                       Forensic Timeline
+                       ========================================================= */
+
+        .forensic-timeline {
+            position: relative;
+            margin-top: 25px;
+            padding-left: 35px;
+        }
+
+
+            /* Main vertical timeline line */
+
+            .forensic-timeline::before {
+                content: "";
+                position: absolute;
+                left: 10px;
+                top: 0;
+                bottom: 0;
+                width: 3px;
+                background-color: #dee2e6;
+            }
+
+
+        /* Individual timeline event */
+
+        .forensic-timeline-item {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+
+        /* Timeline marker */
+
+        .forensic-timeline-marker {
+            position: absolute;
+            left: -31px;
+            top: 20px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 3px solid #ffffff;
+            box-shadow: 0 0 0 2px #dee2e6;
+            z-index: 2;
+        }
+
+
+        /* Severity indicators */
+
+        .timeline-high .forensic-timeline-marker {
+            background-color: #dc3545;
+            box-shadow: 0 0 0 2px #dc3545;
+        }
+
+
+        .timeline-medium .forensic-timeline-marker {
+            background-color: #ffc107;
+            box-shadow: 0 0 0 2px #ffc107;
+        }
+
+
+        .timeline-low .forensic-timeline-marker {
+            background-color: #0dcaf0;
+            box-shadow: 0 0 0 2px #0dcaf0;
+        }
+
+
+        .timeline-default .forensic-timeline-marker {
+            background-color: #6c757d;
+            box-shadow: 0 0 0 2px #6c757d;
+        }
+
+
+        /* Event card */
+
+        .forensic-event-card {
+            border-left: 4px solid #6c757d !important;
+        }
+
+
+            .forensic-event-card.timeline-high {
+                border-left-color: #dc3545 !important;
+            }
+
+
+            .forensic-event-card.timeline-medium {
+                border-left-color: #ffc107 !important;
+            }
+
+
+            .forensic-event-card.timeline-low {
+                border-left-color: #0dcaf0 !important;
+            }
+
+
+            .forensic-event-card.timeline-default {
+                border-left-color: #6c757d !important;
+            }
+
+
+        /* Timestamp */
+
+        .forensic-timestamp {
+            font-family: monospace;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+
+        /* MAC address formatting */
+
+        .forensic-event-card code {
+            font-size: 0.9rem;
+        }
+
+        /* =========================================================
+                   Investigation Evidence Sections
+                   ========================================================= */
+
+        .forensic-event-card h6 {
+            font-weight: 600;
+        }
+
+        .forensic-event-card .alert {
+            font-size: 0.95rem;
+        }
+
+        .forensic-event-card code {
+            word-break: break-all;
+        }
+
+        /* =========================================================
+                   Correlated Packet Evidence
+                   ========================================================= */
+
+        .correlated-packet-card {
+            border-left: 4px solid #6c757d;
+        }
+
+            .correlated-packet-card code {
+                word-break: break-all;
+            }
+
+        /* =========================================================
+                   Forensic Evidence Correlation
+                   ========================================================= */
+
+        .forensic-correlation-chain {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .correlation-step {
+            display: inline-block;
+            padding: 8px 12px;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            background-color: #f8f9fa;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .correlation-arrow {
+            font-size: 1.2rem;
+            color: #6c757d;
+        }
+
+        /* Mobile layout */
+
+        @@media (max-width: 768px) {
+
+            .forensic-timeline {
+                padding-left: 25px;
+            }
+
+                .forensic-timeline::before {
+                    left: 5px;
+                }
+
+            .forensic-timeline-marker {
+                left: -29px;
+            }
+
+            .forensic-timestamp {
+                text-align: left;
+                margin-top: 8px;
+            }
+        }
+
+    </style>
+
+}
