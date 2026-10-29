@@ -37,6 +37,8 @@ namespace BLEForensics.Data
         public DbSet<BluetoothCommunication> BluetoothCommunications
             => Set<BluetoothCommunication>();
 
+        public object SuspiciousEvents { get; internal set; }
+
         protected override void OnModelCreating(
             ModelBuilder modelBuilder)
         {

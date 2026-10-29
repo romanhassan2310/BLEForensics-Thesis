@@ -68,16 +68,8 @@ namespace BLEForensics.Controllers
                 return NotFound();
             }
 
-            // =====================================================
-            // Analysis Session
-            // =====================================================
-
             var analysisSession = _context.AnalysisSessions
                 .FirstOrDefault(x => x.EvidenceFileId == id);
-
-            // =====================================================
-            // Attack Events
-            // =====================================================
 
             var attackEvents = _context.AttackEvents
                 .Where(x => x.EvidenceFileId == id)
@@ -85,18 +77,10 @@ namespace BLEForensics.Controllers
                 .ThenBy(x => x.PacketNumber)
                 .ToList();
 
-            // =====================================================
-            // Bluetooth Devices
-            // =====================================================
-
             var bluetoothDevices = _context.BluetoothDevices
                 .Where(x => x.EvidenceFileId == id)
                 .OrderBy(x => x.MacAddress)
                 .ToList();
-
-            // =====================================================
-            // Bluetooth Protocol Statistics
-            // =====================================================
 
             var protocolStatistics =
                 _context.BluetoothProtocolStatistics
@@ -126,19 +110,11 @@ namespace BLEForensics.Controllers
                 }
             }
 
-            // =====================================================
-            // Bluetooth Communications
-            // =====================================================
-
             var communications =
                 _context.BluetoothCommunications
                     .Where(x => x.EvidenceFileId == id)
                     .OrderByDescending(x => x.Count)
                     .ToList();
-
-            // =====================================================
-            // Suspicious Packets
-            // =====================================================
 
             var suspiciousPackets =
                 _context.SuspiciousPackets
@@ -146,65 +122,26 @@ namespace BLEForensics.Controllers
                     .OrderBy(x => x.PacketNumber)
                     .ToList();
 
-            // =====================================================
-            // Evidence Correlation
-            // =====================================================
-
-            var correlatedPacketCount =
-                suspiciousPackets.Count;
-
-            var correlatedDeviceCount =
-                bluetoothDevices.Count;
-
-            var correlatedCommunicationCount =
-                communications.Count;
-
-            var correlatedEventCount =
-                attackEvents.Count;
-
-            var correlatedProtocols =
-                suspiciousPackets
+            var model = new EvidenceDetailsViewModel
+            {
+                Evidence = evidence,
+                AnalysisSession = analysisSession,
+                AttackEvents = attackEvents,
+                BluetoothDevices = bluetoothDevices,
+                ProtocolStatistics = protocolStatistics,
+                Communications = communications,
+                LayerFrequency = layerFrequency,
+                SuspiciousPackets = suspiciousPackets,
+                CorrelatedPacketCount = suspiciousPackets.Count,
+                CorrelatedDeviceCount = bluetoothDevices.Count,
+                CorrelatedCommunicationCount = communications.Count,
+                CorrelatedEventCount = attackEvents.Count,
+                CorrelatedProtocols = suspiciousPackets
                     .Where(x => !string.IsNullOrWhiteSpace(x.Protocol))
                     .Select(x => x.Protocol)
                     .Distinct()
                     .OrderBy(x => x)
-                    .ToList();
-
-            // =====================================================
-            // Create ViewModel
-            // =====================================================
-
-            var model = new EvidenceDetailsViewModel
-            {
-                Evidence = evidence,
-
-                AnalysisSession = analysisSession,
-
-                AttackEvents = attackEvents,
-
-                BluetoothDevices = bluetoothDevices,
-
-                ProtocolStatistics = protocolStatistics,
-
-                Communications = communications,
-
-                LayerFrequency = layerFrequency,
-
-                SuspiciousPackets = suspiciousPackets,
-
-                // =====================================================
-                // Evidence Correlation
-                // =====================================================
-
-                CorrelatedPacketCount = correlatedPacketCount,
-
-                CorrelatedDeviceCount = correlatedDeviceCount,
-
-                CorrelatedCommunicationCount = correlatedCommunicationCount,
-
-                CorrelatedEventCount = correlatedEventCount,
-
-                CorrelatedProtocols = correlatedProtocols
+                    .ToList()
             };
 
             return View(model);
@@ -223,10 +160,6 @@ namespace BLEForensics.Controllers
                 return View(model);
             }
 
-            // =====================================================
-            // 1. Create Evidence folder
-            // =====================================================
-
             var evidenceFolder = Path.Combine(
                 _environment.ContentRootPath,
                 "Evidence");
@@ -236,10 +169,6 @@ namespace BLEForensics.Controllers
                 Directory.CreateDirectory(evidenceFolder);
             }
 
-            // =====================================================
-            // 2. Generate unique file name
-            // =====================================================
-
             var fileName =
                 Guid.NewGuid() + "_" +
                 model.EvidenceFile.FileName;
@@ -248,10 +177,6 @@ namespace BLEForensics.Controllers
                 evidenceFolder,
                 fileName);
 
-            // =====================================================
-            // 3. Save uploaded PCAP file
-            // =====================================================
-
             using (var stream = new FileStream(
                 filePath,
                 FileMode.Create))
@@ -259,15 +184,11 @@ namespace BLEForensics.Controllers
                 await model.EvidenceFile.CopyToAsync(stream);
             }
 
-            // =====================================================
-            // 4. Calculate SHA-256 hash
-            // =====================================================
-
             string hash;
 
             using (var sha256 = SHA256.Create())
             using (var stream =
-                   System.IO.File.OpenRead(filePath))
+                    System.IO.File.OpenRead(filePath))
             {
                 var hashBytes =
                     sha256.ComputeHash(stream);
@@ -275,13 +196,6 @@ namespace BLEForensics.Controllers
                 hash =
                     Convert.ToHexString(hashBytes);
             }
-
-            // =====================================================
-            // 5. Create EvidenceFile
-            //
-            // UploadDate represents the actual system upload time.
-            // It is NOT a PCAP packet timestamp.
-            // =====================================================
 
             var evidence = new EvidenceFile
             {
@@ -300,291 +214,11 @@ namespace BLEForensics.Controllers
 
             _context.EvidenceFiles.Add(evidence);
 
-            // Save first so EvidenceFile.Id is generated
+            // ১. সবার আগে EvidenceFile সেভ করুন যাতে সুনির্দিষ্ট ID জেনারেট হয়
             await _context.SaveChangesAsync();
 
-            // =====================================================
-            // 6. Run Python / PyShark analysis
-            // =====================================================
-
-            var jsonResult =
-                await _pythonService.AnalyzeAsync(
-                    filePath);
-
-            var analysis =
-                JsonSerializer.Deserialize<AnalysisResult>(
-                    jsonResult,
-                    new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true
-                    });
-
-            // =====================================================
-            // 7. Save analysis results
-            // =====================================================
-
-            if (analysis != null)
-            {
-                // =================================================
-                // 7.1 Analysis Session
-                // =================================================
-
-                var analysisSession =
-                    new AnalysisSession
-                    {
-                        EvidenceFileId =
-                            evidence.Id,
-
-                        TotalPackets =
-                            analysis.TotalPackets,
-
-                        SuspiciousEventCount =
-                            analysis.SuspiciousEvents.Count,
-
-                        // System analysis time.
-                        // This is intentionally different from
-                        // the PCAP capture timestamps.
-                        AnalysisDate =
-                            DateTime.UtcNow,
-
-                        // Original PCAP timeline
-                        CaptureStartTime =
-                            analysis.CaptureStartTime,
-
-                        CaptureEndTime =
-                            analysis.CaptureEndTime
-                    };
-
-                _context.AnalysisSessions.Add(
-                    analysisSession);
-
-                // =================================================
-                // 7.2 Bluetooth Devices
-                // =================================================
-
-                foreach (var deviceAddress
-                    in analysis.Devices)
-                {
-                    if (string.IsNullOrWhiteSpace(
-                        deviceAddress))
-                    {
-                        continue;
-                    }
-
-                    var deviceExists =
-                        _context.BluetoothDevices.Any(
-                            x =>
-                                x.MacAddress ==
-                                    deviceAddress
-                                &&
-                                x.EvidenceFileId ==
-                                    evidence.Id);
-
-                    if (!deviceExists)
-                    {
-                        _context.BluetoothDevices.Add(
-                            new BluetoothDevice
-                            {
-                                MacAddress =
-                                    deviceAddress,
-
-                                DeviceName =
-                                    "Unknown",
-
-                                EvidenceFileId =
-                                    evidence.Id
-                            });
-                    }
-                }
-
-                // =================================================
-                // 7.3 Bluetooth Protocol Statistics
-                // =================================================
-
-                var protocolStatistics =
-                    new BluetoothProtocolStatistic
-                    {
-                        HCICommandCount =
-                            analysis.Protocols.TryGetValue(
-                                "HCI_Command",
-                                out var hciCommand)
-                                ? hciCommand
-                                : 0,
-
-                        HCIEventCount =
-                            analysis.Protocols.TryGetValue(
-                                "HCI_Event",
-                                out var hciEvent)
-                                ? hciEvent
-                                : 0,
-
-                        HCIACLCount =
-                            analysis.Protocols.TryGetValue(
-                                "HCI_ACL",
-                                out var hciAcl)
-                                ? hciAcl
-                                : 0,
-
-                        L2CAPCount =
-                            analysis.Protocols.TryGetValue(
-                                "L2CAP",
-                                out var l2cap)
-                                ? l2cap
-                                : 0,
-
-                        RFCOMMCount =
-                            analysis.Protocols.TryGetValue(
-                                "RFCOMM",
-                                out var rfcomm)
-                                ? rfcomm
-                                : 0,
-
-                        OBEXCount =
-                            analysis.Protocols.TryGetValue(
-                                "OBEX",
-                                out var obex)
-                                ? obex
-                                : 0,
-
-                        SDPCount =
-                            analysis.Protocols.TryGetValue(
-                                "SDP",
-                                out var sdp)
-                                ? sdp
-                                : 0,
-
-                        LayerFrequencyJson =
-                            JsonSerializer.Serialize(
-                                analysis.LayerFrequency),
-
-                        EvidenceFileId =
-                            evidence.Id
-                    };
-
-                _context.BluetoothProtocolStatistics.Add(
-                    protocolStatistics);
-
-                // =================================================
-                // 7.4 Bluetooth Communications
-                // =================================================
-
-                foreach (var communication
-                    in analysis.Communications)
-                {
-                    if (
-                        string.IsNullOrWhiteSpace(
-                            communication.Source)
-                        ||
-                        string.IsNullOrWhiteSpace(
-                            communication.Destination))
-                    {
-                        continue;
-                    }
-
-                    _context.BluetoothCommunications.Add(
-                        new BluetoothCommunication
-                        {
-                            Source =
-                                communication.Source,
-
-                            Destination =
-                                communication.Destination,
-
-                            Count =
-                                communication.Count,
-
-                            EvidenceFileId =
-                                evidence.Id
-                        });
-                }
-
-                // =================================================
-                // 7.5 Suspicious / Attack Events
-                //
-                // IMPORTANT:
-                // Timestamp comes directly from the PCAP.
-                // No DateTime.UtcNow is used here.
-                // =================================================
-
-                foreach (var evt
-                    in analysis.SuspiciousEvents)
-                {
-                    _context.AttackEvents.Add(
-                        new AttackEvent
-                        {
-                            AttackType = evt.AttackType,
-
-                            Severity = evt.Severity,
-
-                            Source = evt.Source,
-
-                            Destination = evt.Destination,
-
-                            Description = evt.Description,
-
-                            Timestamp = evt.Timestamp,
-
-                            PacketNumber = evt.PacketNumber,
-
-                            EndTimestamp = evt.EndTimestamp,
-
-                            EndPacketNumber = evt.EndPacketNumber,
-
-                            EvidenceFileId = evidence.Id
-                        });
-                }
-
-                // =================================================
-                // 7.6 Suspicious Packets
-                //
-                // Timestamp is the original PCAP packet time.
-                // =================================================
-
-                foreach (var packet
-                    in analysis.SuspiciousPackets)
-                {
-                    _context.SuspiciousPackets.Add(
-                        new SuspiciousPacket
-                        {
-                            PacketNumber =
-                                packet.PacketNumber,
-
-                            Timestamp =
-                                packet.Timestamp,
-
-                            Protocol =
-                                packet.Protocol,
-
-                            Source =
-                                packet.Source,
-
-                            Destination =
-                                packet.Destination,
-
-                            PacketLength =
-                                packet.PacketLength,
-
-                            Severity =
-                                packet.Severity,
-
-                            Reason =
-                                packet.Reason,
-
-                            EvidenceFileId =
-                                evidence.Id
-                        });
-                }
-
-                // =================================================
-                // 7.7 Save all analysis data
-                // =================================================
-
-                await _context.SaveChangesAsync();
-            }
-
-            // =====================================================
-            // 8. Success message
-            // =====================================================
+            // ২. Python Analysis সার্ভিসে evidence.Id পাস করুন
+            await _pythonService.AnalyzeAsync(filePath, evidence.Id);
 
             TempData["Success"] =
                 "Evidence uploaded and analyzed successfully.";

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("BLEForensics")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b46a2ce6b6d8580701deb8d7c00eb24f3a351b56")]
 [assembly: System.Reflection.AssemblyProductAttribute("BLEForensics")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BLEForensics")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
